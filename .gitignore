@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+.ivy2/
+spark-warehouse/
+output/*/_SUCCESS
+output/*/._SUCCESS.crc
