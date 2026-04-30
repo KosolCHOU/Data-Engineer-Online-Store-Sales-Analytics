@@ -1,0 +1,11 @@
+.git
+.env
+.venv
+venv
+__pycache__
+*.pyc
+.ivy2
+spark-warehouse
+output
+charts
+notebooks/.ipynb_checkpoints

@@ -65,6 +65,62 @@ POSTGRES_PORT=5432
 
 Use the same password you type when `psql` asks for `Password for user postgres:`. Do not commit `.env`.
 
+## Run With Docker
+
+This is the easiest setup for another machine because Docker runs both PostgreSQL
+and the Python/Spark app.
+
+Prerequisites:
+
+- Docker Desktop, or Docker Engine with Docker Compose
+- The dataset at `data/online_retail_II.xlsx`
+
+Optional: create a Docker-specific env file if you want to override the default
+PostgreSQL credentials used by Compose:
+
+```bash
+cp .env.docker.example .env.docker
+```
+
+Then run the complete pipeline:
+
+```bash
+docker compose up --build app
+```
+
+If you created `.env.docker`, run:
+
+```bash
+docker compose --env-file .env.docker up --build app
+```
+
+The app container runs these steps in order:
+
+```bash
+python src/01_load_to_db.py
+python src/02_spark_extract.py
+python src/04_data_profiling.py
+python src/03_etl_cleaning.py
+python src/05_aggregation.py
+python src/06_visualize_charts.py
+```
+
+Generated CSV files are written to `output/`, and charts are written to
+`charts/` on your host machine.
+
+To stop the containers:
+
+```bash
+docker compose down
+```
+
+To reset PostgreSQL data and rerun from a clean database:
+
+```bash
+docker compose down -v
+docker compose up --build app
+```
+
 ## Execution Order
 
 Run from the project root:
