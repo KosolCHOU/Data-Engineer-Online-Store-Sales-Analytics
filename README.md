@@ -46,7 +46,7 @@ Create a `.env` file in the project root:
 MSSQL_USER=sa
 MSSQL_PASSWORD=replace_this_with_your_real_mssql_password
 MSSQL_DB=online_store
-MSSQL_HOST=localhost
+MSSQL_HOST=localhost\\SQLEXPRESS01
 MSSQL_PORT=1433
 ```
 
@@ -61,6 +61,10 @@ Prerequisites:
 
 - Docker Desktop, or Docker Engine with Docker Compose
 - The dataset at `data/online_retail_II.xlsx`
+
+On Windows, make sure Docker Desktop is running before you start the stack.
+If you see `open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`,
+the Docker daemon is not available yet.
 
 Optional: create a Docker-specific env file if you want to override the default
 MS SQL Server credentials used by Compose:
@@ -156,6 +160,40 @@ hourly_sales
 
 CSV folders are saved under `output/`, each with a Spark `part-*.csv` file.
 
+## Power BI
+
+You can connect Power BI to this project in two ways.
+
+### Option 1: Connect to PostgreSQL directly
+
+Use this if you want live access to the tables created by the pipeline.
+
+1. Make sure PostgreSQL is running and the pipeline has created the tables.
+2. In Power BI Desktop, choose `Get Data` -> `PostgreSQL database`.
+3. Enter the host and port:
+
+- Local Docker: `localhost:5432`
+- Docker Compose from the container network is not needed for Power BI on your PC.
+
+4. Enter the database name, user, and password from your `.env` file.
+5. Load the tables you need, especially `sales_by_country`, `top_products`, `monthly_sales`, `customer_summary`, and `hourly_sales`.
+
+### Option 2: Connect to the exported CSV files
+
+Use this if you want the simplest offline Power BI setup.
+
+1. Run the pipeline so `output/` is populated.
+2. In Power BI Desktop, choose `Get Data` -> `Text/CSV`.
+3. Open the Spark output files inside each folder, for example:
+
+- `output/sales_by_country/part-*.csv`
+- `output/top_products/part-*.csv`
+- `output/monthly_sales/part-*.csv`
+- `output/customer_summary/part-*.csv`
+- `output/hourly_sales/part-*.csv`
+
+If you want a single model in Power BI, import the CSV outputs as separate tables and relate them with shared fields such as country, customer ID, date, or product description where applicable.
+
 ## Troubleshooting
 
 `ModuleNotFoundError: No module named 'dotenv'`
@@ -184,5 +222,19 @@ python src/01_load_to_db.py
 
 Spark warns that the local JDBC jar is missing
 
+<<<<<<< Updated upstream
 This is acceptable if Spark resolves `com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11` from Maven. To work fully offline, place `mssql-jdbc-12.6.1.jre11.jar` in `drivers/`.
+=======
+This is acceptable if Spark resolves `org.postgresql:postgresql:42.7.3` from Maven. To work fully offline, place `postgresql-42.7.3.jar` in `drivers/`.
+
+`open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified`
+
+Start Docker Desktop, wait until it reports that the engine is running, then rerun:
+
+```bash
+docker compose up --build app
+```
+
+> > > > > > > Stashed changes
+
 # Data-Engineer-Online-Store-Sales-Analytics

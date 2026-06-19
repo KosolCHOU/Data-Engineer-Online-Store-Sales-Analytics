@@ -15,19 +15,24 @@ MSSQL_DRIVER_PACKAGE = "com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11"
 db_password = os.getenv("MSSQL_PASSWORD", "")
 if not db_password or db_password in {
     "your_mssql_password",
-    "replace_this_with_your_real_mssql_password"
+    "replace_this_with_your_real_mssql_password",
 }:
-    raise ValueError("Set MSSQL_PASSWORD to your real MS SQL Server password before running this script.")
+    raise ValueError(
+        "Set MSSQL_PASSWORD to your real MS SQL Server password before running this script."
+    )
 
-jdbc_host = os.getenv("MSSQL_HOST", "localhost")
+jdbc_host = os.getenv("MSSQL_HOST", r"localhost\SQLEXPRESS01")
 jdbc_port = os.getenv("MSSQL_PORT", "1433")
 jdbc_db = os.getenv("MSSQL_DB", "online_store")
-jdbc_url = f"jdbc:sqlserver://{jdbc_host}:{jdbc_port};databaseName={jdbc_db};trustServerCertificate=true"
+if "\\" in jdbc_host:
+    jdbc_url = f"jdbc:sqlserver://{jdbc_host};databaseName={jdbc_db};trustServerCertificate=true"
+else:
+    jdbc_url = f"jdbc:sqlserver://{jdbc_host}:{jdbc_port};databaseName={jdbc_db};trustServerCertificate=true"
 
 properties = {
     "user": os.getenv("MSSQL_USER", "sa"),
     "password": db_password,
-    "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
+    "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver",
 }
 
 spark_builder = SparkSession.builder.appName("OnlineStoreETL")
@@ -38,11 +43,7 @@ else:
 
 spark = spark_builder.getOrCreate()
 
-df = spark.read.jdbc(
-    url=jdbc_url,
-    table="online_retail",
-    properties=properties
-)
+df = spark.read.jdbc(url=jdbc_url, table="online_retail", properties=properties)
 
 raw_count = df.count()
 
@@ -73,10 +74,7 @@ print("\nSample clean rows:")
 df_clean.show(10, truncate=False)
 
 df_clean.write.jdbc(
-    url=jdbc_url,
-    table="clean_online_retail",
-    mode="overwrite",
-    properties=properties
+    url=jdbc_url, table="clean_online_retail", mode="overwrite", properties=properties
 )
 
 print("Saved clean_online_retail to MS SQL Server.")
