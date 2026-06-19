@@ -1,19 +1,20 @@
 services:
   db:
-    image: postgres:16
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-online_store}
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_PASSWORD:-YourSecurePassword123!}
+      MSSQL_PID: "Developer"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${MSSQL_PORT:-1433}:1433"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mssql_data:/var/opt/mssql
+      - ./output:/var/opt/mssql/output
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-online_store}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
 
   app:
     build: .
@@ -21,11 +22,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-online_store}
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      MSSQL_USER: sa
+      MSSQL_PASSWORD: ${MSSQL_PASSWORD:-YourSecurePassword123!}
+      MSSQL_DB: ${MSSQL_DB:-online_store}
+      MSSQL_HOST: db
+      MSSQL_PORT: 1433
       MPLBACKEND: Agg
     volumes:
       - ./data:/app/data
@@ -33,4 +34,4 @@ services:
       - ./charts:/app/charts
 
 volumes:
-  postgres_data:
+  mssql_data:

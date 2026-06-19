@@ -8,14 +8,11 @@ if [ ! -f "data/online_retail_II.xlsx" ]; then
   exit 1
 fi
 
-echo "Waiting for PostgreSQL..."
-until pg_isready \
-  -h "${POSTGRES_HOST:-db}" \
-  -p "${POSTGRES_PORT:-5432}" \
-  -U "${POSTGRES_USER:-postgres}" \
-  -d "${POSTGRES_DB:-online_store}" >/dev/null 2>&1; do
+echo "Waiting for SQL Server..."
+until python -c "import socket; s = socket.socket(); s.connect(('${MSSQL_HOST:-db}', 1433))" >/dev/null 2>&1; do
   sleep 2
 done
+
 
 echo "Running sales analytics pipeline..."
 python src/01_load_to_db.py

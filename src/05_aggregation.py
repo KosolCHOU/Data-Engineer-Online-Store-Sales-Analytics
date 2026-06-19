@@ -10,32 +10,32 @@ load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = PROJECT_ROOT / "output"
-POSTGRES_DRIVER_JAR = PROJECT_ROOT / "drivers" / "postgresql-42.7.3.jar"
-POSTGRES_DRIVER_PACKAGE = "org.postgresql:postgresql:42.7.3"
+MSSQL_DRIVER_JAR = PROJECT_ROOT / "drivers" / "mssql-jdbc-12.6.1.jre11.jar"
+MSSQL_DRIVER_PACKAGE = "com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11"
 
-db_password = os.getenv("POSTGRES_PASSWORD", "")
+db_password = os.getenv("MSSQL_PASSWORD", "")
 if not db_password or db_password in {
-    "your_postgres_password",
-    "replace_this_with_your_real_postgres_password"
+    "your_mssql_password",
+    "replace_this_with_your_real_mssql_password"
 }:
-    raise ValueError("Set POSTGRES_PASSWORD to your real PostgreSQL password before running this script.")
+    raise ValueError("Set MSSQL_PASSWORD to your real MS SQL Server password before running this script.")
 
-jdbc_host = os.getenv("POSTGRES_HOST", "localhost")
-jdbc_port = os.getenv("POSTGRES_PORT", "5432")
-jdbc_db = os.getenv("POSTGRES_DB", "online_store")
-jdbc_url = f"jdbc:postgresql://{jdbc_host}:{jdbc_port}/{jdbc_db}"
+jdbc_host = os.getenv("MSSQL_HOST", "localhost")
+jdbc_port = os.getenv("MSSQL_PORT", "1433")
+jdbc_db = os.getenv("MSSQL_DB", "online_store")
+jdbc_url = f"jdbc:sqlserver://{jdbc_host}:{jdbc_port};databaseName={jdbc_db};trustServerCertificate=true"
 
 properties = {
-    "user": os.getenv("POSTGRES_USER", "postgres"),
+    "user": os.getenv("MSSQL_USER", "sa"),
     "password": db_password,
-    "driver": "org.postgresql.Driver"
+    "driver": "com.microsoft.sqlserver.jdbc.SQLServerDriver"
 }
 
 spark_builder = SparkSession.builder.appName("OnlineStoreAggregation")
-if POSTGRES_DRIVER_JAR.exists():
-    spark_builder = spark_builder.config("spark.jars", str(POSTGRES_DRIVER_JAR))
+if MSSQL_DRIVER_JAR.exists():
+    spark_builder = spark_builder.config("spark.jars", str(MSSQL_DRIVER_JAR))
 else:
-    spark_builder = spark_builder.config("spark.jars.packages", POSTGRES_DRIVER_PACKAGE)
+    spark_builder = spark_builder.config("spark.jars.packages", MSSQL_DRIVER_PACKAGE)
 
 spark = spark_builder.getOrCreate()
 

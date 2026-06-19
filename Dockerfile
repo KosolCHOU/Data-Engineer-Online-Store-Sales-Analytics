@@ -13,7 +13,6 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         openjdk-17-jre-headless \
-        postgresql-client \
         procps \
     && rm -rf /var/lib/apt/lists/*
 
@@ -23,10 +22,10 @@ RUN pip install -r requirements.txt
 COPY . .
 
 RUN mkdir -p drivers output charts \
-    && if [ ! -f drivers/postgresql-42.7.3.jar ]; then \
+    && if [ ! -f drivers/mssql-jdbc-12.6.1.jre11.jar ]; then \
         curl -fsSL \
-          https://jdbc.postgresql.org/download/postgresql-42.7.3.jar \
-          -o drivers/postgresql-42.7.3.jar; \
+          https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.6.1.jre11/mssql-jdbc-12.6.1.jre11.jar \
+          -o drivers/mssql-jdbc-12.6.1.jre11.jar; \
       fi \
     && chmod +x scripts/run_pipeline.sh
 

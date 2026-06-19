@@ -4,3 +4,4 @@ python-dotenv
 pyspark
 matplotlib
 seaborn
+pymssql

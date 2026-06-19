@@ -40,34 +40,21 @@ Install Python dependencies:
 pip install -r requirements.txt
 ```
 
-Start PostgreSQL:
-
-```bash
-sudo systemctl start postgresql
-pg_isready -h localhost -p 5432
-```
-
-Create the project database once:
-
-```bash
-psql -U postgres -h localhost -p 5432 -f sql/00_create_database.sql
-```
-
 Create a `.env` file in the project root:
 
 ```bash
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=replace_this_with_your_real_postgres_password
-POSTGRES_DB=online_store
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
+MSSQL_USER=sa
+MSSQL_PASSWORD=replace_this_with_your_real_mssql_password
+MSSQL_DB=online_store
+MSSQL_HOST=localhost
+MSSQL_PORT=1433
 ```
 
-Use the same password you type when `psql` asks for `Password for user postgres:`. Do not commit `.env`.
+Make sure your password is strong (e.g. at least 8 characters, containing uppercase, lowercase, numbers, and special characters). Do not commit `.env`.
 
 ## Run With Docker
 
-This is the easiest setup for another machine because Docker runs both PostgreSQL
+This is the easiest setup for another machine because Docker runs both MS SQL Server
 and the Python/Spark app.
 
 Prerequisites:
@@ -76,7 +63,7 @@ Prerequisites:
 - The dataset at `data/online_retail_II.xlsx`
 
 Optional: create a Docker-specific env file if you want to override the default
-PostgreSQL credentials used by Compose:
+MS SQL Server credentials used by Compose:
 
 ```bash
 cp .env.docker.example .env.docker
@@ -114,7 +101,7 @@ To stop the containers:
 docker compose down
 ```
 
-To reset PostgreSQL data and rerun from a clean database:
+To reset database data and rerun from a clean database:
 
 ```bash
 docker compose down -v
@@ -179,20 +166,12 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-`FATAL: database "online_store" does not exist`
-
-Create the database:
-
-```bash
-psql -U postgres -h localhost -p 5432 -f sql/00_create_database.sql
-```
-
 `FATAL: password authentication failed`
 
-Check `.env` and use your real PostgreSQL password:
+Check `.env` and use your real MS SQL Server password:
 
 ```bash
-POSTGRES_PASSWORD=replace_this_with_your_real_postgres_password
+MSSQL_PASSWORD=replace_this_with_your_real_mssql_password
 ```
 
 `relation "online_retail" does not exist`
@@ -205,5 +184,5 @@ python src/01_load_to_db.py
 
 Spark warns that the local JDBC jar is missing
 
-This is acceptable if Spark resolves `org.postgresql:postgresql:42.7.3` from Maven. To work fully offline, place `postgresql-42.7.3.jar` in `drivers/`.
+This is acceptable if Spark resolves `com.microsoft.sqlserver:mssql-jdbc:12.6.1.jre11` from Maven. To work fully offline, place `mssql-jdbc-12.6.1.jre11.jar` in `drivers/`.
 # Data-Engineer-Online-Store-Sales-Analytics
